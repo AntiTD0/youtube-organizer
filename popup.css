@@ -1,0 +1,605 @@
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  width: 320px;
+  padding: 15px;
+  background: #fff;
+  color: #333;
+}
+
+h2 {
+  color: #ff0000;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+}
+
+/* Form Elements */
+label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: 600;
+  color: #555;
+}
+
+input, select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+button {
+  background: #ff0000;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #e60000;
+}
+
+#status {
+  font-size: 0.9em;
+  color: #666;
+  text-align: center;
+  margin: 5px 0;
+}
+
+/* Saved Videos Section */
+#toggleSaved {
+  background: #4285f4;
+  margin-top: 20px;
+}
+
+#toggleSaved:hover {
+  background: #3367d6;
+}
+
+
+
+
+
+.saved-video {
+  background: #f9f9f9;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.video-info {
+  margin-bottom: 5px;
+}
+
+.video-title {
+  font-weight: bold;
+  margin-bottom: 3px;
+  color: #333;
+}
+
+.video-url-btn {
+  display: inline-block;
+  background: #4285f4;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  margin: 5px 0;
+}
+
+.video-url-btn:hover {
+  background: #3367d6;
+  text-decoration: none;
+}
+
+.delete-btn {
+  background: #ff4444;
+  padding: 4px 8px;
+  font-size: 0.8em;
+  float: right;
+}
+
+.delete-btn:hover {
+  background: #cc0000;
+}
+
+#emptyState {
+  text-align: center;
+  color: #666;
+  padding: 15px;
+  font-size: 0.9em;
+}
+
+
+.no-results {
+  padding: 15px;
+  text-align: center;
+  color: #666;
+  font-size: 0.9em;
+}
+
+
+
+#savedVideosList {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 0 5px;
+}
+
+
+.video-stats {
+  font-size: 0.8em;
+  color: #666;
+  margin: 3px 0;
+  display: flex;
+  gap: 10px;
+}
+
+
+
+
+
+
+
+#searchContainer {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+  border-bottom: 1px solid #eee;
+}
+
+#searchInput {
+  flex: 2;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#filterType {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+
+
+
+/* Add to your existing CSS */
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.button-group button {
+  margin: 0;
+  flex: 1;
+}
+
+.export-btn {
+  background: #0f9d58 !important;
+}
+
+.export-btn:hover {
+  background: #0b8043 !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* Note System Styles */
+.notes-container {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.notes-list {
+  max-height: 150px;
+  overflow-y: auto;
+  margin-bottom: 8px;
+  padding-right: 5px;
+}
+
+.note {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start; /* instead of center */
+  gap: 6px;
+  padding: 6px 8px;
+}
+
+
+.note-timestamp {
+  white-space: nowrap;
+}
+.note-text {
+  overflow-wrap: break-word;
+}
+
+
+
+.delete-note-btn {
+  background: #f42a1c;
+  border: none;
+  color: #d93025;
+  cursor: pointer;
+  font-size: 16px;
+  margin-left: 8px;
+  padding: 0 4px;
+  flex-shrink: 0;
+  width: 150px;
+}
+
+.delete-note-btn:hover {
+  color: #b31412;
+}
+
+.add-note {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.note-timestamp-input,
+.note-text-input {
+  padding: 8px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #202124 !important;
+  background-color: white !important;
+}
+
+.note-timestamp-input {
+  width: 70px;
+  flex: 0 0 auto;
+}
+
+.note-text-input {
+  flex: 1;
+  min-width: 120px;
+}
+
+.add-note-btn {
+  padding: 8px 12px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.add-note-btn:hover {
+  background-color: #1765cc;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .notes-container {
+    border-top-color: #5f6368;
+  }
+
+  .note {
+    background-color: #2d2e30;
+    border-color: #3c4043;
+  }
+
+  .note-text {
+    color: #e8eaed;
+  }
+
+  .note-timestamp {
+    color: #8ab4f8;
+  }
+
+  .note-timestamp-input,
+  .note-text-input {
+    background-color: #3c4043 !important;
+    border-color: #5f6368;
+    color: #e8eaed !important;
+  }
+
+  .add-note-btn {
+    background-color: #8ab4f8;
+    color: #202124;
+  }
+
+  .add-note-btn:hover {
+    background-color: #aecbfa;
+  }
+}
+
+/* Scrollbar styling for notes list */
+.notes-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.notes-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .notes-list::-webkit-scrollbar-track {
+    background: #2d2e30;
+  }
+
+  .notes-list::-webkit-scrollbar-thumb {
+    background: #5f6368;
+  }
+}
+
+
+
+
+
+
+
+
+/* Toggle Switch Styles */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #e62117;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #e62117;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.url-input-container {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.url-input-container input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.url-input-container button {
+  width: auto;
+  padding: 0 10px;
+  background: #ccc;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.url-input-container button:hover {
+  background: #999;
+}
+
+button {
+  background: #ff0000;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+button:hover {
+  background: #e60000;
+}
+
+#status {
+  font-size: 0.9em;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 5px 0;
+}
+
+#status.info {
+  background: #e7f3fe;
+  color: #0c5460;
+}
+
+#status.success {
+  background: #d4edda;
+  color: #155724;
+}
+
+#status.warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+#status.error {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+#thumbnails-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.thumbnail-item {
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.thumbnail-item img {
+  width: 100%;
+  border-radius: 3px;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+}
+
+.thumbnail-title {
+  font-size: 12px;
+  margin: 5px 0;
+  word-break: break-word;
+}
+
+.thumbnail-actions {
+  margin-top: auto;
+}
+
+.download-btn {
+  background: #4285f4;
+  padding: 5px 8px;
+  font-size: 0.8em;
+  width: 100%;
+}
+
+.download-btn:hover {
+  background: #3367d6;
+}
+
+.download-all-btn {
+  grid-column: 1 / -1;
+  background: #0f9d58 !important;
+}
+
+.download-all-btn:hover {
+  background: #0b8043 !important;
+}
+
+.loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 5px;
+  background: #eee;
+  margin-top: 10px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress {
+  height: 100%;
+  width: 0;
+  background: #4285f4;
+  animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes progress {
+  0% { width: 0; margin-left: 0; }
+  50% { width: 100%; margin-left: 0; }
+  100% { width: 0; margin-left: 100%; }
+}
+
+.no-results, .error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}

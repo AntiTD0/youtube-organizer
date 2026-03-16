@@ -1,0 +1,5 @@
+{
+  "name": "youtube-proxy-netlify",
+  "version": "1.0.0",
+  "description": "Netlify function proxy for YouTube API"
+}

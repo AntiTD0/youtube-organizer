@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h2>YouTube Playlist Organizer</h2>
+
+  <label for="apiKey">YouTube API Key:</label>
+  <p>Go to Cloud Console, create project, enable YouTube Data API v3, Go to APIs & Services -> Credentials
+and click “+ Create Credentials” → API key</p>
+  <input type="text" id="apiKey" placeholder="Paste your API key here">
+
+  <label for="sortType">Sort by:</label>
+  <select id="sortType">
+    <option value="title">Title (A to Z)</option>
+    <option value="title-desc">Title (Z to A)</option>
+    <option value="duration">Duration (Shortest to Longest)</option>
+    <option value="duration-desc">Duration (Longest to Shortest)</option>
+    <option value="title-length">Title Length (Shortest to Longest)</option>
+    <option value="title-length-desc">Title Length (Longest to Shortest)</option>
+    <option value="views-desc">Most Popular (Most Views)</option>
+    <option value="views">Least Popular (Least Views)</option>
+    <option value="newest">Upload (Most Recent)</option>
+    <option value="oldest">Upload (Earliest)</option>
+  </select>
+
+  <button id="sortBtn">Sort Playlist</button>
+  <p id="status"></p>
+
+  <div class="user-tip">
+    <strong>Tip:</strong> Refresh YouTube tabs after install/update
+  </div>
+
+  <button id="toggleSaved">▼ Show Saved Videos</button>
+
+<button id="exportCSV" class="export-btn">Export to CSV</button>
+
+  <div id="savedContainer">
+
+
+<div id="searchContainer">
+  <input type="text" id="searchInput" placeholder="Search saved videos...">
+  <select id="filterType">
+    <option value="title">Title (A-Z)</option>
+    <option value="views-desc">Most Views</option>
+    <option value="views">Least Views</option>
+    <option value="likes-desc">Most Likes</option>
+    <option value="likes">Least Likes</option>
+  </select>
+</div>
+
+    <div id="savedVideosList"></div>
+  </div>
+  
+  <div id="emptyState">No videos saved yet.<br>Click "Save Video" on YouTube videos.</div>
+
+
+  <div class="setting-row">
+  <label for="confirmDelete">Confirm before deleting:</label>
+  <label class="switch">
+    <input type="checkbox" id="confirmDelete">
+    <span class="slider round"></span>
+  </label>
+</div>
+
+
+
+<div class="toggle-container">
+    <label class="switch">
+      <input type="checkbox" id="toggle-button" checked>
+      <span class="slider"></span>
+    </label>
+    <span>Capture Button</span>
+  </div>
+
+  <div>
+    <label>Format:
+      <select id="format">
+        <option value="png">PNG</option>
+        <option value="jpeg">JPG</option>
+      </select>
+    </label>
+  </div>
+
+
+
+  <div class="url-input-container">
+    <input type="text" id="playlist-url" placeholder="Paste YouTube URL (channel/playlist/@username)">
+    <button id="clear-url">X</button>
+  </div>
+  
+  <button id="fetch-thumbnails">Fetch Thumbnails</button>
+  
+  <div id="status" class="info"></div>
+  
+  <div id="thumbnails-container"></div>
+
+
+
+  <script src="popup.js"></script>
+</body>
+</html>

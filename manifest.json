@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Playlist Sorter 33",
+  "version": "1.0",
+  "description": "ye",
+  "permissions": [
+    "storage",
+  "scripting",
+  "activeTab"
+  ],
+  "host_permissions": ["*://*.youtube.com/*",
+  "*://youtu.be/*"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+
+ "content_scripts": [{
+  "matches": ["*://*.youtube.com/*"],
+  "js": ["content.js"],
+  "run_at": "document_end"
+}],
+
+"content_security_policy": {
+  "extension_pages": "script-src 'self'; object-src 'self'",
+  "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self';"
+}
+
+
+
+}
