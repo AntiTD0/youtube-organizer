@@ -523,7 +523,7 @@ function escapeHtml(text) {
 }
 
 // Playlist sorting function (injected into page)
-async function sortPlaylistInTab(sortBy, apiKey) {
+async function sortPlaylistInTab(sortBy, proxyUrl) {
   await new Promise(resolve => setTimeout(resolve, 1500));
 
   const playlistId = new URLSearchParams(location.search).get('list');
@@ -553,31 +553,24 @@ async function sortPlaylistInTab(sortBy, apiKey) {
     return;
   }
 
+  // Fetch video details from proxy — proxyUrl is captured from outer scope (closure)
   async function fetchVideoDetails(videoIds) {
-  const chunks = [];
-  for (let i = 0; i < videoIds.length; i += 50) {
-    chunks.push(videoIds.slice(i, i + 50));
-  }
-
-  let details = [];
-  for (const chunk of chunks) {
-    try {
-      // Use the proxy URL passed as second argument
-      const proxyUrl = arguments[1]; // The second argument to sortPlaylistInTab
-      
-      const resp = await fetch(
-        `${proxyUrl}?videoIds=${chunk.join(',')}`
-      );
-      const json = await resp.json();
-      if (json.items) {
-        details = details.concat(json.items);
-      }
-    } catch (error) {
-      console.error('Proxy request failed:', error);
+    const chunks = [];
+    for (let i = 0; i < videoIds.length; i += 50) {
+      chunks.push(videoIds.slice(i, i + 50));
     }
+    let details = [];
+    for (const chunk of chunks) {
+      try {
+        const resp = await fetch(`${proxyUrl}?videoIds=${chunk.join(',')}`);
+        const json = await resp.json();
+        if (json.items) details = details.concat(json.items);
+      } catch (error) {
+        console.error('Proxy request failed:', error);
+      }
+    }
+    return details;
   }
-  return details;
-}
 
   const parseDuration = iso => {
     const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -586,11 +579,17 @@ async function sortPlaylistInTab(sortBy, apiKey) {
     return h * 3600 + m * 60 + s;
   };
 
+  // Build DOM title map as fallback (works even without API)
+  const domTitleMap = Object.fromEntries(videoElements.map(({ el, videoId }) => {
+    const titleEl = el.querySelector('#video-title');
+    return [videoId, titleEl?.textContent.trim() || ''];
+  }));
+
   const details = await fetchVideoDetails(videoElements.map(v => v.videoId));
   const detailMap = Object.fromEntries(details.map(d => [
     d.id,
     {
-      title: d.snippet?.title || '',
+      title: d.snippet?.title || domTitleMap[d.id] || '',
       duration: parseDuration(d.contentDetails?.duration || ''),
       views: parseInt(d.statistics?.viewCount || '0'),
       published: new Date(d.snippet?.publishedAt || 0).getTime()
@@ -598,20 +597,22 @@ async function sortPlaylistInTab(sortBy, apiKey) {
   ]));
 
   const sorted = [...videoElements].sort((a, b) => {
+    const aTitle = detailMap[a.videoId]?.title || domTitleMap[a.videoId] || '';
+    const bTitle = detailMap[b.videoId]?.title || domTitleMap[b.videoId] || '';
     const aData = detailMap[a.videoId] || {};
     const bData = detailMap[b.videoId] || {};
 
     switch (sortBy) {
-      case 'title': return aData.title.localeCompare(bData.title);
-      case 'title-desc': return bData.title.localeCompare(aData.title);
-      case 'duration': return aData.duration - bData.duration;
-      case 'duration-desc': return bData.duration - aData.duration;
-      case 'title-length': return aData.title.length - bData.title.length;
-      case 'title-length-desc': return bData.title.length - aData.title.length;
-      case 'views': return aData.views - bData.views;
-      case 'views-desc': return bData.views - aData.views;
-      case 'newest': return bData.published - aData.published;
-      case 'oldest': return aData.published - bData.published;
+      case 'title': return aTitle.localeCompare(bTitle);
+      case 'title-desc': return bTitle.localeCompare(aTitle);
+      case 'duration': return (aData.duration||0) - (bData.duration||0);
+      case 'duration-desc': return (bData.duration||0) - (aData.duration||0);
+      case 'title-length': return aTitle.length - bTitle.length;
+      case 'title-length-desc': return bTitle.length - aTitle.length;
+      case 'views': return (aData.views||0) - (bData.views||0);
+      case 'views-desc': return (bData.views||0) - (aData.views||0);
+      case 'newest': return (bData.published||0) - (aData.published||0);
+      case 'oldest': return (aData.published||0) - (bData.published||0);
       default: return 0;
     }
   });
@@ -622,22 +623,22 @@ async function sortPlaylistInTab(sortBy, apiKey) {
     return;
   }
 
-  // Step 1: Detach the container from DOM so YouTube's observers stop firing
+  // Detach from DOM so YouTube's MutationObservers stop watching
   const grandparent = parent.parentElement;
   const nextSibling = parent.nextSibling;
   grandparent.removeChild(parent);
 
-  // Step 2: Reorder while detached
+  // Reorder while detached
   sorted.forEach(v => parent.appendChild(v.el));
 
-  // Step 3: Re-attach
+  // Re-attach
   if (nextSibling) {
     grandparent.insertBefore(parent, nextSibling);
   } else {
     grandparent.appendChild(parent);
   }
 
-  // Step 4: Guardian observer — if YouTube reverts the order, re-apply for 5 seconds
+  // Guardian: re-apply sort if YouTube reverts it within 5 seconds
   const sortedIds = sorted.map(v => v.videoId);
 
   const getIds = () => Array.from(parent.querySelectorAll(
