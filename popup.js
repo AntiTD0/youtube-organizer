@@ -371,8 +371,7 @@ async function handleSort() {
         func: sortPlaylistInTab,
         args: [sortBy, PROXY_URL] // Pass proxy URL instead of apiKey
       });
-      const sortBy = document.getElementById('sortType').value;
-  console.log('Sort by:', sortBy);
+      console.log('Sort by:', sortBy);
       updateStatus('✅ Playlist sorted!', 'success');
       
     } catch (error) {
