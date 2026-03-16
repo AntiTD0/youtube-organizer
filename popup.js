@@ -4,7 +4,7 @@ let confirmDeleteEnabled = false;
 // Add these proxy URLs
 const PROXY_URLS = {
   local: 'http://localhost:8888/.netlify/functions/youtube-proxy',
-  production: 'https://your-site.netlify.app/.netlify/functions/youtube-proxy' // You'll update this after Netlify deploy
+  production: 'https://ytb-orner.netlify.app/.netlify/functions/youtube-proxy' // You'll update this after Netlify deploy
 };
 
 // Helper function to update proxy display
