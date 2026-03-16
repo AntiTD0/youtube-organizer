@@ -1,21 +1,7 @@
 let savedContainerVisible = false;
 let confirmDeleteEnabled = false;
 
-// Add these proxy URLs
-const PROXY_URLS = {
-  local: 'http://localhost:8888/.netlify/functions/youtube-proxy',
-  production: 'https://ytb-orner.netlify.app/.netlify/functions/youtube-proxy' // You'll update this after Netlify deploy
-};
 
-// Helper function to update proxy display
-function updateProxyDisplay(devMode) {
-  const display = document.getElementById('proxyUrlDisplay');
-  if (display) {
-    const url = devMode ? PROXY_URLS.local : PROXY_URLS.production;
-    display.textContent = `📍 Proxy: ${url}`;
-    display.style.color = devMode ? '#e62117' : '#666';
-  }
-}
 
 // Initialize popup when DOM loads
 document.addEventListener('DOMContentLoaded', initializePopup);
@@ -26,15 +12,7 @@ function initializePopup() {
   document.getElementById('savedContainer').style.display = 'none';
   loadSavedVideos();
   
-  // Add this to load dev mode setting
-  chrome.storage.local.get(['devMode'], (result) => {
-    const devMode = result.devMode || false;
-    const toggle = document.getElementById('devMode');
-    if (toggle) {
-      toggle.checked = devMode;
-      updateProxyDisplay(devMode);
-    }
-  });
+
 }
 
 function setupEventListeners() {
@@ -63,12 +41,6 @@ function setupEventListeners() {
   // Delegated event listener for video actions
   document.getElementById('savedVideosList').addEventListener('click', handleVideoActions);
 
-  document.getElementById('devMode')?.addEventListener('change', (e) => {
-    const devMode = e.target.checked;
-    chrome.storage.local.set({ devMode });
-    updateProxyDisplay(devMode);
-    updateStatus(`Switched to ${devMode ? 'LOCAL' : 'PRODUCTION'} proxy`, 'info');
-  });
 }
 
 function loadSettings() {
