@@ -5,14 +5,16 @@
   "description": "ye",
   "permissions": [
     "storage",
-  "scripting",
-  "activeTab"
+    "scripting",
+    "activeTab",
+    "downloads"
   ],
-  "host_permissions": ["*://*.youtube.com/*",
+  "host_permissions": [
     "*://*.youtube.com/*",
     "*://youtu.be/*",
-    "https://your-site.netlify.app/*",
-    "http://localhost:8888/*"],
+    "https://ytb-orner.netlify.app/*",
+    "http://localhost:8888/*"
+  ],
   "action": {
     "default_popup": "popup.html"
   },

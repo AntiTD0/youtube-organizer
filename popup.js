@@ -386,7 +386,7 @@ async function handleFetchThumbnails() {
   const url = document.getElementById('playlist-url').value.trim();
   
   if (url && !isValidYouTubeUrl(url)) {
-    updateStatus('Invalid YouTube URL', 'error');
+    updateThumbnailStatus('Invalid YouTube URL', 'error');
     return;
   }
   
@@ -397,7 +397,7 @@ async function handleFetchThumbnails() {
   try {
     await fetchThumbnails(url);
   } catch (error) {
-    updateStatus('Error: ' + error.message, 'error');
+    updateThumbnailStatus('Error: ' + error.message, 'error');
   }
 }
 
@@ -405,7 +405,7 @@ function handleClearUrl() {
   document.getElementById('playlist-url').value = '';
   document.getElementById('thumbnails-container').innerHTML = '';
   chrome.storage.local.remove('lastThumbnailUrl');
-  updateStatus('Cleared input and results');
+  updateThumbnailStatus('Cleared input and results');
 }
 
 async function fetchThumbnails(url) {
@@ -434,14 +434,14 @@ const thumbnails = await chrome.tabs.sendMessage(tab.id, {
 
     if (thumbnails?.length > 0) {
       renderThumbnails(thumbnails);
-      updateStatus(`Found ${thumbnails.length} thumbnails`, 'success');
+      updateThumbnailStatus(`Found ${thumbnails.length} thumbnails`, 'success');
     } else {
       container.innerHTML = '<div class="no-results">No thumbnails found.</div>';
-      updateStatus('No thumbnails found', 'warning');
+      updateThumbnailStatus('No thumbnails found', 'warning');
     }
   } catch (error) {
     container.innerHTML = '<div class="error">Error: ' + error.message + '</div>';
-    updateStatus('Error: ' + error.message, 'error');
+    updateThumbnailStatus('Error: ' + error.message, 'error');
   }
 }
 
@@ -485,7 +485,7 @@ function renderThumbnails(thumbnails) {
 }
 
 // Utility functions
-function updateStatus(message, type = 'info') {
+function updateThumbnailStatus(message, type = 'info') {
   const statusDiv = document.getElementById('status');
   statusDiv.textContent = message;
   statusDiv.className = type;
@@ -617,20 +617,61 @@ async function sortPlaylistInTab(sortBy, apiKey) {
     return;
   }
 
-  // Disconnect YouTube's MutationObserver temporarily by cloning the parent
-  // then reordering inside the clone and swapping — prevents YT re-render fighting back
-  const clone = parent.cloneNode(false); // empty clone, no children
+  // Step 1: Detach the container from DOM so YouTube's observers stop firing
+  const grandparent = parent.parentElement;
+  const nextSibling = parent.nextSibling;
+  grandparent.removeChild(parent);
 
-  // Move all non-video children first (spinners, separators, etc.)
-  const videoEls = new Set(sorted.map(v => v.el));
-  Array.from(parent.children).forEach(child => {
-    if (!videoEls.has(child)) clone.appendChild(child);
+  // Step 2: Reorder while detached
+  sorted.forEach(v => parent.appendChild(v.el));
+
+  // Step 3: Re-attach
+  if (nextSibling) {
+    grandparent.insertBefore(parent, nextSibling);
+  } else {
+    grandparent.appendChild(parent);
+  }
+
+  // Step 4: Guardian observer — if YouTube reverts the order, re-apply for 5 seconds
+  const sortedIds = sorted.map(v => v.videoId);
+
+  const getIds = () => Array.from(parent.querySelectorAll(
+    'ytd-playlist-video-renderer, ytd-playlist-panel-video-renderer'
+  )).map(el => {
+    const link = el.querySelector('a[href*="v="]');
+    return link ? new URL(link.href, location.origin).searchParams.get('v') : null;
   });
 
-  // Append videos in sorted order
-  sorted.forEach(v => clone.appendChild(v.el));
+  const reapply = () => {
+    const elMap = {};
+    Array.from(parent.querySelectorAll(
+      'ytd-playlist-video-renderer, ytd-playlist-panel-video-renderer'
+    )).forEach(el => {
+      const link = el.querySelector('a[href*="v="]');
+      if (link) {
+        const id = new URL(link.href, location.origin).searchParams.get('v');
+        elMap[id] = el;
+      }
+    });
+    const gp = parent.parentElement;
+    const ns = parent.nextSibling;
+    gp.removeChild(parent);
+    sortedIds.forEach(id => { if (elMap[id]) parent.appendChild(elMap[id]); });
+    if (ns) gp.insertBefore(parent, ns); else gp.appendChild(parent);
+  };
 
-  parent.parentElement.replaceChild(clone, parent);
+  const guardian = new MutationObserver(() => {
+    const current = getIds();
+    const isReverted = sortedIds.some((id, i) => id !== current[i]);
+    if (isReverted) {
+      guardian.disconnect();
+      reapply();
+      guardian.observe(parent, { childList: true });
+    }
+  });
+
+  guardian.observe(parent, { childList: true });
+  setTimeout(() => guardian.disconnect(), 5000);
 }
 
 // Listen for storage changes
