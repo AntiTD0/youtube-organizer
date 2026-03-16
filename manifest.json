@@ -1,14 +1,19 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Playlist Sorter 33",
-  "version": "1.0",
-  "description": "ye",
+  "name": "YouTube Playlist Sorter",
+  "version": "1.0.0",
+  "description": "Tool to help you sort sidebar & main playlists on YouTube. Includes also video saving and thumbnail capture features.",
   "permissions": [
     "storage",
     "scripting",
     "activeTab",
     "downloads"
   ],
+  "icons": {
+  "16": "icons/icon16.png",
+  "48": "icons/icon48.png",
+  "128": "icons/icon128.png"
+  },
   "host_permissions": [
     "*://*.youtube.com/*",
     "*://youtu.be/*",
