@@ -617,8 +617,20 @@ async function sortPlaylistInTab(sortBy, apiKey) {
     return;
   }
 
-  parent.innerHTML = '';
-  sorted.forEach(v => parent.appendChild(v.el));
+  // Disconnect YouTube's MutationObserver temporarily by cloning the parent
+  // then reordering inside the clone and swapping — prevents YT re-render fighting back
+  const clone = parent.cloneNode(false); // empty clone, no children
+
+  // Move all non-video children first (spinners, separators, etc.)
+  const videoEls = new Set(sorted.map(v => v.el));
+  Array.from(parent.children).forEach(child => {
+    if (!videoEls.has(child)) clone.appendChild(child);
+  });
+
+  // Append videos in sorted order
+  sorted.forEach(v => clone.appendChild(v.el));
+
+  parent.parentElement.replaceChild(clone, parent);
 }
 
 // Listen for storage changes
