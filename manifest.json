@@ -9,7 +9,10 @@
   "activeTab"
   ],
   "host_permissions": ["*://*.youtube.com/*",
-  "*://youtu.be/*"],
+    "*://*.youtube.com/*",
+    "*://youtu.be/*",
+    "https://your-site.netlify.app/*",
+    "http://localhost:8888/*"],
   "action": {
     "default_popup": "popup.html"
   },

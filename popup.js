@@ -1,6 +1,22 @@
 let savedContainerVisible = false;
 let confirmDeleteEnabled = false;
 
+// Add these proxy URLs
+const PROXY_URLS = {
+  local: 'http://localhost:8888/.netlify/functions/youtube-proxy',
+  production: 'https://your-site.netlify.app/.netlify/functions/youtube-proxy' // You'll update this after Netlify deploy
+};
+
+// Helper function to update proxy display
+function updateProxyDisplay(devMode) {
+  const display = document.getElementById('proxyUrlDisplay');
+  if (display) {
+    const url = devMode ? PROXY_URLS.local : PROXY_URLS.production;
+    display.textContent = `📍 Proxy: ${url}`;
+    display.style.color = devMode ? '#e62117' : '#666';
+  }
+}
+
 // Initialize popup when DOM loads
 document.addEventListener('DOMContentLoaded', initializePopup);
 
@@ -9,6 +25,16 @@ function initializePopup() {
   loadSettings();
   document.getElementById('savedContainer').style.display = 'none';
   loadSavedVideos();
+  
+  // Add this to load dev mode setting
+  chrome.storage.local.get(['devMode'], (result) => {
+    const devMode = result.devMode || false;
+    const toggle = document.getElementById('devMode');
+    if (toggle) {
+      toggle.checked = devMode;
+      updateProxyDisplay(devMode);
+    }
+  });
 }
 
 function setupEventListeners() {
@@ -36,6 +62,13 @@ function setupEventListeners() {
   
   // Delegated event listener for video actions
   document.getElementById('savedVideosList').addEventListener('click', handleVideoActions);
+
+  ocument.getElementById('devMode')?.addEventListener('change', (e) => {
+    const devMode = e.target.checked;
+    chrome.storage.local.set({ devMode });
+    updateProxyDisplay(devMode);
+    updateStatus(`Switched to ${devMode ? 'LOCAL' : 'PRODUCTION'} proxy`, 'info');
+  });
 }
 
 function loadSettings() {
@@ -321,32 +354,37 @@ function exportToCSV() {
   });
 }
 
-// Sort functionality
 async function handleSort() {
-  const apiKey = document.getElementById('apiKey').value.trim();
   const sortBy = document.getElementById('sortType').value;
-
-  if (!apiKey) {
-    updateStatus('API Key is required.');
-    return;
-  }
-
-  updateStatus('Sorting playlist...');
-
-  try {
-    chrome.storage.local.set({ apiKey });
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  
+  // Get the current mode from storage
+  chrome.storage.local.get(['devMode'], async (result) => {
+    const devMode = result.devMode || false;
+    const PROXY_URL = devMode ? PROXY_URLS.local : PROXY_URLS.production;
     
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: sortPlaylistInTab,
-      args: [sortBy, apiKey]
-    });
-    
-    updateStatus('Playlist sorted.');
-  } catch (error) {
-    updateStatus('Error: ' + error.message);
-  }
+    updateStatus(`Sorting playlist... (${devMode ? '🔧 LOCAL' : '🌐 PRODUCTION'})`, 'info');
+
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      
+      if (!tab.url.includes('youtube.com')) {
+        updateStatus('Please navigate to YouTube first', 'error');
+        return;
+      }
+
+      await chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: sortPlaylistInTab,
+        args: [sortBy, PROXY_URL] // Pass proxy URL instead of apiKey
+      });
+      
+      updateStatus('✅ Playlist sorted!', 'success');
+      
+    } catch (error) {
+      console.error('Sort error:', error);
+      updateStatus('❌ Error: ' + error.message, 'error');
+    }
+  });
 }
 
 // Thumbnail functionality
@@ -517,27 +555,30 @@ async function sortPlaylistInTab(sortBy, apiKey) {
   }
 
   async function fetchVideoDetails(videoIds) {
-    const chunks = [];
-    for (let i = 0; i < videoIds.length; i += 50) {
-      chunks.push(videoIds.slice(i, i + 50));
-    }
-
-    let details = [];
-    for (const chunk of chunks) {
-      try {
-        const resp = await fetch(
-          `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${chunk.join(',')}&key=${apiKey}`
-        );
-        const json = await resp.json();
-        if (json.items) {
-          details = details.concat(json.items);
-        }
-      } catch (error) {
-        console.error('API request failed:', error);
-      }
-    }
-    return details;
+  const chunks = [];
+  for (let i = 0; i < videoIds.length; i += 50) {
+    chunks.push(videoIds.slice(i, i + 50));
   }
+
+  let details = [];
+  for (const chunk of chunks) {
+    try {
+      // Use the proxy URL passed as second argument
+      const proxyUrl = arguments[1]; // The second argument to sortPlaylistInTab
+      
+      const resp = await fetch(
+        `${proxyUrl}?videoIds=${chunk.join(',')}`
+      );
+      const json = await resp.json();
+      if (json.items) {
+        details = details.concat(json.items);
+      }
+    } catch (error) {
+      console.error('Proxy request failed:', error);
+    }
+  }
+  return details;
+}
 
   const parseDuration = iso => {
     const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
