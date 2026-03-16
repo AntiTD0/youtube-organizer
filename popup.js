@@ -63,7 +63,7 @@ function setupEventListeners() {
   // Delegated event listener for video actions
   document.getElementById('savedVideosList').addEventListener('click', handleVideoActions);
 
-  ocument.getElementById('devMode')?.addEventListener('change', (e) => {
+  document.getElementById('devMode')?.addEventListener('change', (e) => {
     const devMode = e.target.checked;
     chrome.storage.local.set({ devMode });
     updateProxyDisplay(devMode);
@@ -72,12 +72,6 @@ function setupEventListeners() {
 }
 
 function loadSettings() {
-  // Load API key
-  chrome.storage.local.get(['apiKey'], result => {
-    if (result.apiKey) {
-      document.getElementById('apiKey').value = result.apiKey;
-    }
-  });
   
   // Load confirm delete setting
   chrome.storage.local.get(['confirmDeleteEnabled'], result => {
