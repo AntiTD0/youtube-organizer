@@ -485,10 +485,15 @@ function renderThumbnails(thumbnails) {
 }
 
 // Utility functions
-function updateThumbnailStatus(message, type = 'info') {
+function updateStatus(message, type = 'info') {
   const statusDiv = document.getElementById('status');
   statusDiv.textContent = message;
   statusDiv.className = type;
+}
+
+function updateThumbnailStatus(message, type = 'info') {
+  const el = document.getElementById('thumbnail-status');
+  if (el) { el.textContent = message; el.className = type; }
 }
 
 function isValidYouTubeUrl(url) {
