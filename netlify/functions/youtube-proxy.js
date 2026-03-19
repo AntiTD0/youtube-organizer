@@ -1,13 +1,12 @@
-// This file calls YouTube API with your hidden key
+
 exports.handler = async (event) => {
-  // Enable CORS for your extension
+
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'GET, OPTIONS'
   };
 
-  // Handle preflight
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
@@ -15,8 +14,7 @@ exports.handler = async (event) => {
   try {
     const { videoIds } = event.queryStringParameters;
     
-    // Your API key from Netlify environment variables
-    const API_KEY = process.env.YOUTUBE_API_KEY; // 🔐 Hidden on Netlify!
+    const API_KEY = process.env.YOUTUBE_API_KEY;
     
     const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds}&key=${API_KEY}`;
     

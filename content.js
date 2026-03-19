@@ -20,14 +20,12 @@ function injectSaveButton() {
     delete window.ytSaveButtonTimeout;
   }
 
-  // Only inject on watch pages
   if (!window.location.href.includes('/watch')) {
     if (saveButton) removeSaveButton();
     return;
   }
 
   const tryInjection = (attempt = 0) => {
-    // Updated selectors for YouTube's 2025 DOM structure
     const titleContainer =
       document.querySelector('ytd-watch-metadata #title h1')?.parentElement ||
       document.querySelector('#above-the-fold #title h1')?.parentElement ||
@@ -50,7 +48,6 @@ function injectSaveButton() {
       return;
     }
 
-    // Check for existing button
     const existingBtn = titleContainer.querySelector('#yt-save-btn');
     if (existingBtn) {
       saveButton = existingBtn;
@@ -58,10 +55,8 @@ function injectSaveButton() {
       return;
     }
 
-    // Remove any stray buttons
     document.querySelectorAll('#yt-save-btn').forEach(btn => btn.remove());
 
-    // Create new button
     saveButton = document.createElement('button');
     saveButton.id = 'yt-save-btn';
     saveButton.style.cssText = `
@@ -80,7 +75,6 @@ function injectSaveButton() {
     updateButtonState();
     setupButtonLogic();
 
-    // Insert after the title element or append to container
     const titleElement = titleContainer.querySelector('h1');
     if (titleElement) {
       titleElement.insertAdjacentElement('afterend', saveButton);
@@ -89,9 +83,6 @@ function injectSaveButton() {
     }
   };
 
-
-  
-  // Start injection with a shorter initial delay
   window.ytSaveButtonTimeout = setTimeout(tryInjection, INITIAL_INJECTION_DELAY);
 }
 
@@ -115,7 +106,6 @@ function setupButtonLogic() {
     const title = document.querySelector('#title h1')?.textContent.trim() || 'No Title';
     const channel = document.querySelector('#channel-name a')?.textContent.trim() || 'Unknown';
 
-    // Get views
     let views = 0;
     const viewsElement =
       document.querySelector('.view-count') ||
@@ -125,7 +115,6 @@ function setupButtonLogic() {
       views = parseInt(viewsText.replace(/\D/g, '')) || 0;
     }
 
-    // Get likes
     let likes = 0;
     const likeSelectors = [
       'div#segmented-like-button yt-formatted-string',
@@ -168,7 +157,7 @@ function setupButtonLogic() {
             },
           ],
         }, () => {
-          updateButtonState(); // Update button immediately after saving
+          updateButtonState();
         });
       }
     });
@@ -305,15 +294,15 @@ const recoveryInterval = setInterval(() => {
 
 
 document.addEventListener('yt-navigate-start', () => {
-  removeSaveButton(); // Clean up old buttons early
+  removeSaveButton();
 });
 
 document.addEventListener('yt-navigate-finish', () => {
   console.log('YouTube navigation finished');
   setTimeout(() => {
-    injectSaveButton();      // Initial attempt
+    injectSaveButton();
 
-  }, 1000); // Delay ensures DOM is hydrated
+  }, 1000);
 });
 
 
@@ -371,7 +360,7 @@ function waitForImagesToLoad(timeout = 7000) {
 
     images.forEach((img) => {
       if (img.complete && img.naturalWidth >= 120 && img.naturalHeight >= 90) {
-        done(); // good thumbnail
+        done();
       } else {
         img.addEventListener('load', () => {
           if (img.naturalWidth >= 120) done();

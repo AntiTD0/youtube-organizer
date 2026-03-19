@@ -2,8 +2,6 @@ let savedContainerVisible = false;
 let confirmDeleteEnabled = false;
 
 
-
-// Initialize popup when DOM loads
 document.addEventListener('DOMContentLoaded', initializePopup);
 
 function initializePopup() {
@@ -16,48 +14,39 @@ function initializePopup() {
 }
 
 function setupEventListeners() {
-  // Sort functionality
+
   document.getElementById('sortBtn').addEventListener('click', handleSort);
   
-  // Saved videos toggle
   document.getElementById('toggleSaved').addEventListener('click', toggleSavedContainer);
   
-  // Export functionality
   document.getElementById('exportCSV').addEventListener('click', exportToCSV);
   
-  // Settings
   document.getElementById('confirmDelete').addEventListener('change', handleConfirmDeleteChange);
   document.getElementById('toggle-button').addEventListener('change', handleCaptureButtonToggle);
   document.getElementById('format').addEventListener('change', handleFormatChange);
   
-  // Thumbnail functionality
   document.getElementById('fetch-thumbnails').addEventListener('click', handleFetchThumbnails);
   document.getElementById('clear-url').addEventListener('click', handleClearUrl);
   
-  // Search and filter
   document.getElementById('searchInput').addEventListener('input', handleSearchFilter);
   document.getElementById('filterType').addEventListener('change', handleSearchFilter);
   
-  // Delegated event listener for video actions
   document.getElementById('savedVideosList').addEventListener('click', handleVideoActions);
 
 }
 
 function loadSettings() {
   
-  // Load confirm delete setting
   chrome.storage.local.get(['confirmDeleteEnabled'], result => {
     confirmDeleteEnabled = result.confirmDeleteEnabled || false;
     document.getElementById('confirmDelete').checked = confirmDeleteEnabled;
   });
   
-  // Load capture button settings
   chrome.storage.sync.get(['buttonEnabled', 'format'], data => {
     document.getElementById('toggle-button').checked = data.buttonEnabled !== false;
     document.getElementById('format').value = data.format || 'png';
   });
   
-  // Load last thumbnail URL
   chrome.storage.local.get(['lastThumbnailUrl'], ({ lastThumbnailUrl }) => {
     if (lastThumbnailUrl) {
       document.getElementById('playlist-url').value = lastThumbnailUrl;
@@ -66,9 +55,9 @@ function loadSettings() {
 
 
 chrome.storage.sync.get(['buttonEnabled'], data => {
-    const isEnabled = data.buttonEnabled !== false; // Default to true
+    const isEnabled = data.buttonEnabled !== false;
     document.getElementById('toggle-button').checked = isEnabled;
-    // Send initial state to content script
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.url?.includes('youtube.com')) {
         chrome.tabs.sendMessage(tabs[0].id, {
@@ -97,7 +86,6 @@ function loadSavedVideos() {
   chrome.storage.local.get({savedVideos: []}, (data) => {
     const hasVideos = data.savedVideos.length > 0;
     
-    // Show/hide UI elements based on whether we have videos
     document.getElementById('toggleSaved').style.display = hasVideos ? 'block' : 'none';
     document.getElementById('exportCSV').style.display = hasVideos ? 'block' : 'none';
     document.getElementById('emptyState').style.display = hasVideos ? 'none' : 'block';
@@ -105,7 +93,6 @@ function loadSavedVideos() {
     if (hasVideos) {
       renderSavedVideos(data.savedVideos);
     } else {
-      // Reset container visibility if no videos
       savedContainerVisible = false;
       document.getElementById('savedContainer').style.display = 'none';
       document.getElementById('toggleSaved').textContent = '▼ Show Saved Videos';
@@ -151,7 +138,6 @@ function renderSavedVideos(videos) {
 }
 
 function handleVideoActions(e) {
-  // Only prevent default for buttons, not <a> tags
   if (e.target.tagName !== 'A') {
     e.preventDefault();
     e.stopPropagation();
@@ -167,10 +153,9 @@ function handleVideoActions(e) {
       parseInt(e.target.getAttribute('data-note-id'))
     );
   } else if (e.target.classList.contains('video-url-btn')) {
-    // Use chrome.tabs.create for <a> tag clicks
     const url = e.target.getAttribute('href');
     if (url) {
-      e.preventDefault(); // Prevent default navigation only for clicks
+      e.preventDefault();
       chrome.tabs.create({ url });
     }
   }
@@ -183,7 +168,7 @@ function deleteVideo(videoId) {
     chrome.storage.local.get({savedVideos: []}, (data) => {
       const updated = data.savedVideos.filter(v => v.id !== videoId);
       chrome.storage.local.set({savedVideos: updated}, () => {
-        loadSavedVideos(); // Reload the list
+        loadSavedVideos();
       });
     });
   };
@@ -224,7 +209,7 @@ function addNote(videoId) {
     
     chrome.storage.local.set({savedVideos: updatedVideos}, () => {
       textInput.value = '';
-      loadSavedVideos(); // Reload to show new note
+      loadSavedVideos();
     });
   });
 }
@@ -242,7 +227,7 @@ function deleteNote(videoId, noteId) {
     });
 
     chrome.storage.local.set({savedVideos: updatedVideos}, () => {
-      loadSavedVideos(); // Reload to remove deleted note
+      loadSavedVideos();
     });
   });
 }
@@ -271,7 +256,6 @@ function handleSearchFilter() {
   });
 }
 
-// Settings handlers
 function handleConfirmDeleteChange(e) {
   confirmDeleteEnabled = e.target.checked;
   chrome.storage.local.set({ confirmDeleteEnabled });
@@ -295,7 +279,6 @@ function handleFormatChange(e) {
   chrome.storage.sync.set({ format: e.target.value });
 }
 
-// Export functionality
 function exportToCSV() {
   chrome.storage.local.get({savedVideos: []}, (data) => {
     const headers = ['Title', 'Channel', 'Views', 'Likes', 'URL', 'Saved At'];
@@ -323,7 +306,6 @@ function exportToCSV() {
 async function handleSort() {
   const sortBy = document.getElementById('sortType').value;
   
-  // Get the current mode from storage
   chrome.storage.local.get(['devMode'], async (result) => {
     const devMode = result.devMode || false;
     const PROXY_URL = devMode ? PROXY_URLS.local : PROXY_URLS.production;
@@ -341,19 +323,18 @@ async function handleSort() {
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: sortPlaylistInTab,
-        args: [sortBy, PROXY_URL] // Pass proxy URL instead of apiKey
+        args: [sortBy, PROXY_URL]
       });
       console.log('Sort by:', sortBy);
-      updateStatus('✅ Playlist sorted!', 'success');
+      updateStatus('Playlist sorted', 'success');
       
     } catch (error) {
       console.error('Sort error:', error);
-      updateStatus('❌ Error: ' + error.message, 'error');
+      updateStatus('Error: ' + error.message, 'error');
     }
   });
 }
 
-// Thumbnail functionality
 async function handleFetchThumbnails() {
   const url = document.getElementById('playlist-url').value.trim();
   
@@ -456,7 +437,6 @@ function renderThumbnails(thumbnails) {
   });
 }
 
-// Utility functions
 function updateStatus(message, type = 'info') {
   const statusDiv = document.getElementById('status');
   statusDiv.textContent = message;
@@ -494,7 +474,6 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Playlist sorting function (injected into page)
 async function sortPlaylistInTab(sortBy, proxyUrl) {
   await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -525,7 +504,6 @@ async function sortPlaylistInTab(sortBy, proxyUrl) {
     return;
   }
 
-  // Fetch video details from proxy — proxyUrl is captured from outer scope (closure)
   async function fetchVideoDetails(videoIds) {
     const chunks = [];
     for (let i = 0; i < videoIds.length; i += 50) {
@@ -551,7 +529,6 @@ async function sortPlaylistInTab(sortBy, proxyUrl) {
     return h * 3600 + m * 60 + s;
   };
 
-  // Build DOM title map as fallback (works even without API)
   const domTitleMap = Object.fromEntries(videoElements.map(({ el, videoId }) => {
     const titleEl = el.querySelector('#video-title');
     return [videoId, titleEl?.textContent.trim() || ''];
@@ -595,22 +572,18 @@ async function sortPlaylistInTab(sortBy, proxyUrl) {
     return;
   }
 
-  // Detach from DOM so YouTube's MutationObservers stop watching
   const grandparent = parent.parentElement;
   const nextSibling = parent.nextSibling;
   grandparent.removeChild(parent);
 
-  // Reorder while detached
   sorted.forEach(v => parent.appendChild(v.el));
 
-  // Re-attach
   if (nextSibling) {
     grandparent.insertBefore(parent, nextSibling);
   } else {
     grandparent.appendChild(parent);
   }
 
-  // Guardian: re-apply sort if YouTube reverts it within 5 seconds
   const sortedIds = sorted.map(v => v.videoId);
 
   const getIds = () => Array.from(parent.querySelectorAll(
@@ -652,10 +625,8 @@ async function sortPlaylistInTab(sortBy, proxyUrl) {
   setTimeout(() => guardian.disconnect(), 5000);
 }
 
-// Listen for storage changes
 chrome.storage.onChanged.addListener(loadSavedVideos);
 
-// Listen for download progress
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "downloadProgress") {
     updateStatus(`Downloading ${message.completed}/${message.total}: ${message.current}`);

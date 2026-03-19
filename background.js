@@ -3,7 +3,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const isMultiple = request.thumbnails.length > 1;
     const folderName = isMultiple ? `yt_thumbnails_${Date.now()}` : '';
     
-    // Track download progress
     let completed = 0;
     const total = request.thumbnails.length;
     
@@ -23,7 +22,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           console.error('Download failed:', chrome.runtime.lastError);
         }
         
-        // Send progress update
         chrome.runtime.sendMessage({
           action: "downloadProgress",
           completed,
@@ -33,7 +31,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     });
     
-    return true; // Keep the message channel open for sendResponse
+    return true;
   }
 });
 
