@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Playlist Sorter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tool to help you sort sidebar & main playlists on YouTube. Includes also video saving and thumbnail capture features.",
   "permissions": [
     "storage",
@@ -9,34 +9,25 @@
     "activeTab",
     "downloads"
   ],
-"host_permissions": [
-  "*://*.youtube.com/*",
-  "*://youtu.be/*",
-  "https://yt-organizer-sage.vercel.app/*"
-],
+  "host_permissions": [
+    "*://*.youtube.com/*",
+    "*://youtu.be/*",
+    "https://yt-organizer-sage.vercel.app/*"
+  ],
   "action": {
-  "default_popup": "popup.html",
-  "default_icon": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  }
-},
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
   "background": {
     "service_worker": "background.js"
   },
-
- "content_scripts": [{
-  "matches": ["*://*.youtube.com/*"],
-  "js": ["content.js"],
-  "run_at": "document_end"
-}],
-
-"content_security_policy": {
-  "extension_pages": "script-src 'self'; object-src 'self'",
-  "sandbox": "sandbox allow-scripts allow-forms allow-popups allow-modals; script-src 'self' 'unsafe-inline' 'unsafe-eval'; child-src 'self';"
-}
-
-
-
+  "content_scripts": [{
+    "matches": ["*://*.youtube.com/*"],
+    "js": ["content.js"],
+    "run_at": "document_end"
+  }]
 }

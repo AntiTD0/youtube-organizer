@@ -1,36 +1,17 @@
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-exports.handler = async (event) => {
-
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS'
-  };
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const { videoIds } = event.queryStringParameters;
-    
-    const API_KEY = process.env.YOUTUBE_API_KEY;
-    
-    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${videoIds}&key=${API_KEY}`;
-    
+    const { videoIds } = req.query;
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&id=${encodeURIComponent(videoIds)}&key=${process.env.YOUTUBE_API_KEY}`;
     const response = await fetch(url);
     const data = await response.json();
-    
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify(data)
-    };
+    res.status(200).json(data);
   } catch (error) {
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: error.message })
-    };
+    res.status(500).json({ error: error.message });
   }
-};
+}
