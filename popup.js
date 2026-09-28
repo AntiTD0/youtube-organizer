@@ -2,6 +2,11 @@ let savedContainerVisible = false;
 let confirmDeleteEnabled = false;
 
 
+const PROXY_URLS = {
+  local: 'http://localhost:8888/.netlify/functions/youtube-proxy',
+  production: 'https://yt-organizer-sage.vercel.app/api/youtube-proxy'
+};
+
 document.addEventListener('DOMContentLoaded', initializePopup);
 
 function initializePopup() {

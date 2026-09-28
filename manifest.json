@@ -9,12 +9,11 @@
     "activeTab",
     "downloads"
   ],
-  "host_permissions": [
-    "*://*.youtube.com/*",
-    "*://youtu.be/*",
-    "https://ytb-orner.netlify.app/*"
-
-  ],
+"host_permissions": [
+  "*://*.youtube.com/*",
+  "*://youtu.be/*",
+  "https://yt-organizer-sage.vercel.app/*"
+],
   "action": {
   "default_popup": "popup.html",
   "default_icon": {
